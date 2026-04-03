@@ -1,0 +1,47 @@
+version: '3.8'
+
+# AI Aggregator News - Docker Deployment
+# 使用项目名称 ai-aggregator-news 进行隔离
+
+services:
+  crawler:
+    build:
+      context: ./crawler
+      dockerfile: Dockerfile
+    container_name: ai-aggregator-news-crawler
+    ports:
+      - "30852:8000"
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - ai-aggregator-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:30852
+    container_name: ai-aggregator-news-frontend
+    ports:
+      - "3852:3852"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:30852
+      - TZ=Asia/Shanghai
+    restart: unless-stopped
+    depends_on:
+      - crawler
+    networks:
+      - ai-aggregator-network
+
+networks:
+  ai-aggregator-network:
+    name: ai-aggregator-network
+    driver: bridge
