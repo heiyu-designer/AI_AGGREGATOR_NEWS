@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+@theme {
+  /* 主色系 */
+  --color-primary: #e63946;
+  --color-secondary: #457b9d;
+  --color-accent: #f4a261;
+
+  /* 背景色 - 渐变基底 */
+  --color-bg-start: #f8f9fa;
+  --color-bg-end: #e9ecef;
+  --color-card: #ffffff;
+  --color-border: #e9ecef;
+
+  /* 文字色 */
+  --color-text: #1d1d1d;
+  --color-text-secondary: #6c757d;
+  --color-text-muted: #adb5bd;
+
+  /* 分类色 */
+  --color-cat-ai-model: #6c5ce7;
+  --color-cat-ai-product: #00b894;
+  --color-cat-academic: #0984e3;
+  --color-cat-industry: #e17055;
+  --color-cat-tech: #00cec9;
+
+  /* 字体 */
+  --font-mono: "Fira Code", monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-bg-start);
+  color: var(--color-text);
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 自定义滚动条 - 更细更美观的样式 */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #cbd5e1 0%, #94a3b8 100%);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #94a3b8 0%, #64748b 100%);
+}
+
+/* 卡片 hover 效果 - 更柔和的阴影 */
+.news-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.news-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* 淡入动画 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in-up {
+  animation: fadeInUp 0.3s ease forwards;
+}
+
+/* 渐变文字效果 */
+.bg-gradient-text {
+  background: linear-gradient(90deg, #ef4444 0%, #f97316 50%, #eab308 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 玻璃态效果 */
+.glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* 卡片悬浮效果 */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* 按钮悬浮微动效 */
+.btn-hover {
+  transition: all 0.2s ease;
+}
+.btn-hover:hover {
+  transform: scale(1.02);
+}
+.btn-hover:active {
+  transform: scale(0.98);
+}

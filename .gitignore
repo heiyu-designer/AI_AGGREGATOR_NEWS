@@ -1,0 +1,33 @@
+# Dependencies
+frontend/node_modules/
+crawler/__pycache__/
+crawler/**/__pycache__/
+crawler/core/__pycache__/
+crawler/sources/__pycache__/
+
+# Python
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Playwright
+.playwright-mcp/
+playwright/.cache/
+playwright-report/
+test-results/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+/tmp/
