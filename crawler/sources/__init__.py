@@ -23,6 +23,8 @@ from sources import youtube
 from sources import shaoshupai
 from sources import jianshu
 from sources import ithome
+from sources import huxiu
+from sources import ftchinese
 
 # 来源列表 — 按优先级和重要性排序
 # 格式：(SourceClass, 是否启用, 采集间隔秒数)
@@ -47,6 +49,8 @@ SOURCE_REGISTRY: list[tuple[type[BaseSource], bool, int]] = [
     (youtube.YouTubeSource, True, 1800),            # YouTube
     (shaoshupai.ShaoshupaiSource, True, 1800),     # 少数派
     (jianshu.JianshuSource, True, 1800),           # 简书
+    (huxiu.HuxiuSource, True, 1800),              # 虎嗅网
+    (ftchinese.FtchineseSource, True, 3600),      # FT中文网
 ]
 
 
