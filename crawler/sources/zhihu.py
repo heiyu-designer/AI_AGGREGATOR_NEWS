@@ -4,9 +4,12 @@
 不做严格AI关键词过滤，取全部热搜。
 """
 
+import logging
 import httpx
 from sources.base import BaseSource, SourceInfo, NewsItem
 from core.normalizer import normalize_item
+
+logger = logging.getLogger(__name__)
 
 
 class ZhihuSource(BaseSource):
@@ -20,7 +23,7 @@ class ZhihuSource(BaseSource):
 
     async def fetch(self) -> list[NewsItem]:
         try:
-            async with httpx.AsyncClient(timeout=15.0) as client:
+            async with httpx.AsyncClient(timeout=10.0) as client:
                 resp = await client.get(
                     'https://api.zhihu.com/topstory/hot-lists/total',
                     headers={
@@ -29,7 +32,8 @@ class ZhihuSource(BaseSource):
                     }
                 )
                 data = resp.json()
-        except Exception:
+        except Exception as e:
+            logger.warning(f'[zhihu] 抓取异常: {type(e).__name__}: {e}')
             return []
 
         items = []

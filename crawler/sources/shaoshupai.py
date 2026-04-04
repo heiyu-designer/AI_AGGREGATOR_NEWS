@@ -1,9 +1,12 @@
 """少数派 RSS 爬虫 — 使用官方 RSS Feed"""
 
+import logging
 import httpx
 import feedparser
 from sources.base import BaseSource, SourceInfo, NewsItem
 from core.normalizer import normalize_item
+
+logger = logging.getLogger(__name__)
 
 
 class ShaoshupaiSource(BaseSource):
@@ -20,12 +23,13 @@ class ShaoshupaiSource(BaseSource):
         try:
             r = httpx.get(
                 'https://sspai.com/feed',
-                timeout=15.0,
+                timeout=8.0,
                 headers={'User-Agent': 'Mozilla/5.0'},
             )
             feed = feedparser.parse(r.text)
             raw_items = feed.entries or []
-        except Exception:
+        except Exception as e:
+            logger.warning(f'[sspai] 抓取异常: {type(e).__name__}: {e}')
             return []
 
         for i, entry in enumerate(raw_items[:30], start=1):

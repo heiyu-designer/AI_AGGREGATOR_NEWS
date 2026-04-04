@@ -4,9 +4,12 @@
 同样不做AI关键词过滤，取全部热搜，保证数据量。
 """
 
+import logging
 import httpx
 from sources.base import BaseSource, SourceInfo, NewsItem
 from core.normalizer import normalize_item
+
+logger = logging.getLogger(__name__)
 
 
 class WeiboSource(BaseSource):
@@ -22,7 +25,7 @@ class WeiboSource(BaseSource):
         items = []
 
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
+            async with httpx.AsyncClient(timeout=8.0) as client:
                 resp = await client.get(
                     'https://weibo.com/ajax/side/hotSearch',
                     headers={
@@ -36,7 +39,8 @@ class WeiboSource(BaseSource):
                 realtime = data.get('data', {}).get('realtime', []) or []
                 band_list = data.get('data', {}).get('band_list', []) or []
                 all_bands = realtime + band_list
-        except Exception:
+        except Exception as e:
+            logger.warning(f'[weibo] 抓取异常: {type(e).__name__}: {e}')
             return []
 
         # 取全部热搜，不做AI关键词过滤

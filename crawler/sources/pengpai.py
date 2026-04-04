@@ -1,10 +1,11 @@
 """澎湃新闻 Playwright 爬虫"""
 
-import httpx
-from bs4 import BeautifulSoup
+import logging
 from sources.base import BaseSource, SourceInfo, NewsItem
 from core.normalizer import normalize_item
 from playwright.sync_api import sync_playwright
+
+logger = logging.getLogger(__name__)
 
 
 class PengpaiSource(BaseSource):
@@ -22,8 +23,8 @@ class PengpaiSource(BaseSource):
             with sync_playwright() as p:
                 browser = p.chromium.launch(args=['--no-sandbox'])
                 page = browser.new_page()
-                page.goto('https://www.thepaper.cn/', timeout=15000, wait_until='networkidle')
-                page.wait_for_timeout(3000)
+                page.goto('https://www.thepaper.cn/', timeout=10000, wait_until='domcontentloaded')
+                page.wait_for_timeout(2000)
 
                 # JS 提取新闻标题和详情页链接
                 raw_results = page.evaluate('''
@@ -94,7 +95,7 @@ class PengpaiSource(BaseSource):
                         rank=i,
                     )
                     items.append(normalize_item(item))
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f'[pengpai] 抓取异常: {type(e).__name__}: {e}')
 
         return items

@@ -1,8 +1,11 @@
 """GitHub Trending AI 项目爬虫 — 使用 GitHub Search API"""
 
+import logging
 import httpx
 from sources.base import BaseSource, SourceInfo, NewsItem
 from core.normalizer import normalize_item
+
+logger = logging.getLogger(__name__)
 
 
 class GitHubTrendingSource(BaseSource):
@@ -18,7 +21,7 @@ class GitHubTrendingSource(BaseSource):
         items = []
 
         try:
-            async with httpx.AsyncClient(timeout=15.0) as client:
+            async with httpx.AsyncClient(timeout=8.0) as client:
                 resp = await client.get(
                     'https://api.github.com/search/repositories',
                     params={
@@ -34,7 +37,8 @@ class GitHubTrendingSource(BaseSource):
                 )
                 data = resp.json()
                 raw_items = data.get('items', []) or []
-        except Exception:
+        except Exception as e:
+            logger.warning(f'[github] 抓取异常: {type(e).__name__}: {e}')
             return []
 
         for i, entry in enumerate(raw_items[:15], start=1):

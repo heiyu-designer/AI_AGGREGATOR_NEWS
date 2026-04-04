@@ -1,8 +1,11 @@
 """人民网爬虫 — people.com.cn"""
 
+import logging
 import httpx
 from sources.base import BaseSource, SourceInfo, NewsItem
 from core.normalizer import normalize_item
+
+logger = logging.getLogger(__name__)
 
 
 class PeopleSource(BaseSource):
@@ -23,7 +26,7 @@ class PeopleSource(BaseSource):
                     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
                     'Accept': 'text/html,application/xhtml+xml',
                 },
-                timeout=15,
+                timeout=8,
             )
             resp.raise_for_status()
             text = resp.text
@@ -53,7 +56,7 @@ class PeopleSource(BaseSource):
                     raw_score=100 - len(items),
                     rank=len(items) + 1,
                 )))
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f'[people] 抓取异常: {type(e).__name__}: {e}')
 
         return items[:30]

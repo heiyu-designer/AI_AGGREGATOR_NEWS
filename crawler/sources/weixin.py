@@ -1,9 +1,12 @@
 """微信热文爬虫 — 搜狗微信搜索 (weixin.sogou.com)"""
 
+import logging
 import httpx
 from bs4 import BeautifulSoup
 from sources.base import BaseSource, SourceInfo, NewsItem
 from core.normalizer import normalize_item
+
+logger = logging.getLogger(__name__)
 
 
 class WeixinSource(BaseSource):
@@ -26,7 +29,7 @@ class WeixinSource(BaseSource):
                     'Accept-Language': 'zh-CN,zh;q=0.9',
                     'Referer': 'https://weixin.sogou.com/',
                 },
-                timeout=15,
+                timeout=8,
             )
             resp.raise_for_status()
             soup = BeautifulSoup(resp.text, 'html.parser')
@@ -73,7 +76,7 @@ class WeixinSource(BaseSource):
                         raw_score=100 - len(items),
                         rank=len(items) + 1,
                     )))
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f'[weixin] 抓取异常: {type(e).__name__}: {e}')
 
         return items[:30]

@@ -1,9 +1,12 @@
 """Hacker News 爬虫 — 使用官方 Firebase API"""
 
 import asyncio
+import logging
 import httpx
 from sources.base import BaseSource, SourceInfo, NewsItem
 from core.normalizer import normalize_item
+
+logger = logging.getLogger(__name__)
 
 
 # 放宽的 AI 相关关键词（覆盖更多技术讨论）
@@ -31,7 +34,7 @@ class HackerNewsSource(BaseSource):
     async def _fetch_top_ids(self, client: httpx.AsyncClient) -> list[int]:
         resp = await client.get(
             'https://hacker-news.firebaseio.com/v0/topstories.json',
-            timeout=10.0,
+            timeout=5.0,
         )
         # 扩大抓取范围，从前 50 改为 100
         return resp.json()[:100]
@@ -39,19 +42,20 @@ class HackerNewsSource(BaseSource):
     async def _fetch_item(self, client: httpx.AsyncClient, item_id: int) -> dict:
         resp = await client.get(
             f'https://hacker-news.firebaseio.com/v0/item/{item_id}.json',
-            timeout=10.0,
+            timeout=5.0,
         )
         return resp.json() or {}
 
     async def fetch(self) -> list[NewsItem]:
         items = []
         try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
+            async with httpx.AsyncClient(timeout=10.0) as client:
                 top_ids = await self._fetch_top_ids(client)
                 # 并发抓取更多条目
                 tasks = [self._fetch_item(client, id_) for id_ in top_ids]
                 results = await asyncio.gather(*tasks, return_exceptions=True)
-        except Exception:
+        except Exception as e:
+            logger.warning(f'[hackernews] 抓取异常: {type(e).__name__}: {e}')
             return []
 
         for i, result in enumerate(results, start=1):

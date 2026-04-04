@@ -1,8 +1,11 @@
 """Toolify.ai Playwright 爬虫 — AI 工具排行榜"""
 
+import logging
 from playwright.sync_api import sync_playwright
 from sources.base import BaseSource, SourceInfo, NewsItem
 from core.normalizer import normalize_item
+
+logger = logging.getLogger(__name__)
 
 
 class ToolifySource(BaseSource):
@@ -20,27 +23,26 @@ class ToolifySource(BaseSource):
             with sync_playwright() as p:
                 browser = p.chromium.launch(args=['--no-sandbox'])
                 page = browser.new_page()
-                page.goto('https://www.toolify.ai/Best-trending-AI-Tools', timeout=15000, wait_until='networkidle')
-                page.wait_for_timeout(3000)
+                page.goto('https://www.toolify.ai/Best-trending-AI-Tools', timeout=10000, wait_until='domcontentloaded')
+                page.wait_for_timeout(2000)
 
                 # 滚动加载更多内容
                 page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
-                page.wait_for_timeout(2000)
+                page.wait_for_timeout(1500)
 
                 raw_results = page.evaluate('''
                     () => {
                         const results = [];
                         const seen = new Set();
                         document.querySelectorAll('a').forEach(a => {
-                            const href = a.href;
-                            const text = a.innerText.trim();
-                            // 匹配 AI 工具详情页（通常是外部链接如 xxx.ai, xxx.com）
-                            // 排除导航链接
-                            if (href && !seen.has(href)
-                                && !href.includes('/login') && !href.includes('/signup')
-                                && !href.includes('toolify.ai') || href.match(/toolify\\.ai\\/\\w+\\?utm/)) {
-                                if (href.includes('.ai') || href.includes('.io') || href.includes('.com')
-                                    || (href.includes('toolify.ai') && !href.match(/toolify\\.ai\\/$/))) {
+                            const href = a.href || '';
+                            const text = (a.innerText || '').trim();
+                            if (!href || seen.has(href)) return;
+                            if (href.includes('/login') || href.includes('/signup')) return;
+                            const isUtm = href.includes('toolify.ai') && href.includes('utm');
+                            const isAi = href.includes('.ai') || href.includes('.io') || href.includes('.com');
+                            const isToolify = href.includes('toolify.ai') && !href.endsWith('toolify.ai/');
+                            if ((!href.includes('toolify.ai') || isUtm) && (isAi || isToolify)) {
                                 if (text.length >= 2 && text.length <= 60) {
                                     seen.add(href);
                                     results.push({ title: text, url: href });
@@ -66,7 +68,7 @@ class ToolifySource(BaseSource):
                         rank=i,
                     )
                     items.append(normalize_item(item))
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f'[toolify] 抓取异常: {type(e).__name__}: {e}')
 
         return items[:20]

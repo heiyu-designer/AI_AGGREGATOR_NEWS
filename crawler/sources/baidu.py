@@ -1,10 +1,13 @@
 """百度热搜 PC 端爬虫 — 解析网页中的标题"""
 
+import logging
+import re
 import httpx
 from bs4 import BeautifulSoup
 from sources.base import BaseSource, SourceInfo, NewsItem
 from core.normalizer import normalize_item
-import re
+
+logger = logging.getLogger(__name__)
 
 
 class BaiduSource(BaseSource):
@@ -21,7 +24,7 @@ class BaiduSource(BaseSource):
         try:
             r = httpx.get(
                 'https://top.baidu.com/board?tab=realtime',
-                timeout=15.0,
+                timeout=8.0,
                 headers={
                     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                     'Accept-Language': 'zh-CN,zh;q=0.9',
@@ -37,7 +40,8 @@ class BaiduSource(BaseSource):
 
             # 查找含热度的父元素
             hot_els = soup.find_all(class_=re.compile('hot.*score|hotScore', re.I))
-        except Exception:
+        except Exception as e:
+            logger.warning(f'[baidu] 抓取异常: {type(e).__name__}: {e}')
             return []
 
         # 提取标题和链接

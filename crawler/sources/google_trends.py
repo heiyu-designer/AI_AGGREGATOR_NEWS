@@ -3,9 +3,12 @@
 注意: Google Trends API 在部分地区限流，如返回空数据属正常现象。
 """
 
+import logging
 from pytrends.request import TrendReq
 from sources.base import BaseSource, SourceInfo, NewsItem
 from core.normalizer import normalize_item
+
+logger = logging.getLogger(__name__)
 
 
 class GoogleTrendsSource(BaseSource):
@@ -17,17 +20,18 @@ class GoogleTrendsSource(BaseSource):
         interval_seconds=3600,
     )
 
-    def _fetch_with_retry(self, kw_list: list[str], retries: int = 1) -> dict:
+    def _fetch_with_retry(self, kw_list: list[str], retries: int = 2) -> dict:
+        import time
         for attempt in range(retries):
             try:
                 pytrends = TrendReq(hl='en-US', tz=480)
                 pytrends.build_payload(kw_list=kw_list, timeframe='now 1-d')
                 data = pytrends.related_topics()
                 return data
-            except Exception:
+            except Exception as e:
+                logger.warning(f'[google_trends] 第 {attempt+1} 次尝试失败: {type(e).__name__}: {e}')
                 if attempt < retries - 1:
-                    import time
-                    time.sleep(3)
+                    time.sleep(2)
         return {}
 
     def fetch(self) -> list[NewsItem]:
@@ -40,7 +44,8 @@ class GoogleTrendsSource(BaseSource):
         items = []
         try:
             data = self._fetch_with_retry(ai_topics[:5])
-        except Exception:
+        except Exception as e:
+            logger.warning(f'[google_trends] 抓取异常: {type(e).__name__}: {e}')
             return []
 
         for topic_list in data.values():
@@ -72,5 +77,4 @@ class GoogleTrendsSource(BaseSource):
                 )
                 items.append(normalize_item(item))
 
-        # 如果 API 返回空，返回空列表（容错）
         return items[:20]

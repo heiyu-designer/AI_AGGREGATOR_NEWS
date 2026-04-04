@@ -1,9 +1,11 @@
 """网易新闻 Playwright 爬虫 — news.163.com"""
 
-import httpx
+import logging
 from sources.base import BaseSource, SourceInfo, NewsItem
 from core.normalizer import normalize_item
 from playwright.sync_api import sync_playwright
+
+logger = logging.getLogger(__name__)
 
 
 class NeteaseSource(BaseSource):
@@ -21,8 +23,8 @@ class NeteaseSource(BaseSource):
             with sync_playwright() as p:
                 browser = p.chromium.launch(args=['--no-sandbox'])
                 page = browser.new_page()
-                page.goto('https://news.163.com/', timeout=15000, wait_until='networkidle')
-                page.wait_for_timeout(3000)
+                page.goto('https://news.163.com/', timeout=10000, wait_until='domcontentloaded')
+                page.wait_for_timeout(2000)
 
                 raw_results = page.evaluate('''
                     () => {
@@ -62,7 +64,7 @@ class NeteaseSource(BaseSource):
                         rank=i,
                     )
                     items.append(normalize_item(item))
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f'[163news] 抓取异常: {type(e).__name__}: {e}')
 
         return items[:30]

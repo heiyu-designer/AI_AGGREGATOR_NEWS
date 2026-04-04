@@ -1,8 +1,11 @@
 """简书爬虫 — 使用 Playwright 爬取 AI 相关文章"""
 
+import logging
 from playwright.sync_api import sync_playwright
 from sources.base import BaseSource, SourceInfo, NewsItem
 from core.normalizer import normalize_item
+
+logger = logging.getLogger(__name__)
 
 
 class JianshuSource(BaseSource):
@@ -22,10 +25,10 @@ class JianshuSource(BaseSource):
                 page = browser.new_page()
                 page.goto(
                     'https://www.jianshu.com/search?q=AI&page=1&per_page=30',
-                    timeout=20000,
-                    wait_until='networkidle',
+                    timeout=10000,
+                    wait_until='domcontentloaded',
                 )
-                page.wait_for_timeout(3000)
+                page.wait_for_timeout(2000)
 
                 # 从搜索结果中提取文章
                 raw_results = page.evaluate('''
@@ -89,7 +92,7 @@ class JianshuSource(BaseSource):
                         rank=i,
                     )
                     items.append(normalize_item(item))
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f'[jianshu] 抓取异常: {type(e).__name__}: {e}')
 
         return items
