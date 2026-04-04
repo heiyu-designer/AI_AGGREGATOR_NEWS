@@ -6,9 +6,11 @@ from sources.base import BaseSource, SourceInfo, NewsItem
 from core.normalizer import normalize_item
 
 
-# Nitter 实例（按可用性排序）
+# Nitter 实例（按可用性排序，nitter.privacydev.net 是备选）
 NITTER_INSTANCES = [
     'https://nitter.net',
+    'https://nitter.privacydev.net',
+    'https://nitter.poast.org',
 ]
 
 # AI/科技相关的 Twitter 账号
@@ -40,7 +42,8 @@ class TwitterSource(BaseSource):
                     resp = httpx.get(
                         f'{instance}/{username}/rss',
                         headers={'User-Agent': 'Mozilla/5.0'},
-                        timeout=3,
+                        timeout=2,          # 快速失败，不阻塞
+                        follow_redirects=True,
                     )
                     if resp.status_code != 200 or len(resp.text) < 500:
                         continue
@@ -75,7 +78,7 @@ class TwitterSource(BaseSource):
                 except Exception:
                     continue
 
-            # 如果已经获取到足够数据，就停止
+            # 获取到足够数据就停止
             if len(items) >= 20:
                 break
 

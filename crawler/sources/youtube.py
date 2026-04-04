@@ -11,7 +11,6 @@ from core.normalizer import normalize_item
 AI_CHANNELS = [
     ('3Blue1Brown', 'UCWN3xxRkmTPmbKwht9FuE5A'),
     ('DeepMind', 'UCMiJRAwDNSNzuYeN2uWa0pA'),
-    ('Siraj Raval', 'UCWN3xxRkmTPmbKwht9FuE5A'),
     ('StatQuest', 'UCtYLUTtgS3kCtFgFY7-vhlQ'),
     ('Yannic Kilcher', 'UCXUPKJOwMGNxqk4LSdLLYqA'),
     ('MIT OpenCourseWare', 'UCDapq3k2VDKaV9wU1X_LPmg'),
@@ -31,13 +30,13 @@ class YouTubeSource(BaseSource):
         items = []
         seen_titles = set()
 
-        # 方案1：RSS feeds（对大陆访问较稳定的频道）
+        # 方案1：RSS feeds（快速失败：每频道 3s 超时，够 10 条即停止）
         for name, channel_id in AI_CHANNELS:
             try:
                 resp = httpx.get(
                     f'https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}',
                     headers={'User-Agent': 'Mozilla/5.0'},
-                    timeout=8,
+                    timeout=3,          # 快速失败，不阻塞后续源
                 )
                 if resp.status_code != 200:
                     continue
@@ -63,6 +62,9 @@ class YouTubeSource(BaseSource):
                             raw_score=100 - len(items),
                             rank=len(items) + 1,
                         )))
+                # 够 10 条即停止，抓更多频道意义不大
+                if len(items) >= 10:
+                    break
             except Exception:
                 continue
 
@@ -75,7 +77,7 @@ class YouTubeSource(BaseSource):
                         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
                         'Accept': 'text/html,application/xhtml+xml',
                     },
-                    timeout=10,
+                    timeout=5,          # 快速失败
                 )
                 text = resp.text
 
