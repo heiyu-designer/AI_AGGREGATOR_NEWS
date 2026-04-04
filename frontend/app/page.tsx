@@ -30,8 +30,10 @@ const PLATFORMS = [
   { source: 'baidu', label: '百度热搜', icon: '🔍', bg: 'bg-gradient-to-r from-blue-400 to-blue-500' },
   { source: 'kr36', label: '36氪', icon: '🚀', bg: 'bg-gradient-to-r from-purple-500 to-purple-600' },
   { source: 'ithome', label: 'IT之家', icon: '💻', bg: 'bg-gradient-to-r from-orange-400 to-red-500' },
+  { source: 'qbitai', label: '量子位', icon: '⚛️', bg: 'bg-gradient-to-r from-cyan-500 to-blue-600' },
   { source: 'banyuetan', label: '半月谈', icon: '📚', bg: 'bg-gradient-to-r from-indigo-500 to-indigo-600' },
   { source: 'google_trends', label: 'Google Trends', icon: '🌐', bg: 'bg-gradient-to-r from-teal-500 to-teal-600' },
+  { source: 'huggingface', label: 'Hugging Face', icon: '🤗', bg: 'bg-gradient-to-r from-yellow-400 to-orange-500' },
   { source: 'sspai', label: '少数派', icon: '✒️', bg: 'bg-gradient-to-r from-yellow-500 to-orange-500' },
   { source: 'jianshu', label: '简书', icon: '📝', bg: 'bg-gradient-to-r from-gray-500 to-gray-600' },
 ];

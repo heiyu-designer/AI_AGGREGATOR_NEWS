@@ -25,6 +25,8 @@ from sources import jianshu
 from sources import ithome
 from sources import huxiu
 from sources import ftchinese
+from sources import qbitai
+from sources import huggingface
 
 # 来源列表 — 按优先级和重要性排序
 # 格式：(SourceClass, 是否启用, 采集间隔秒数)
@@ -51,6 +53,8 @@ SOURCE_REGISTRY: list[tuple[type[BaseSource], bool, int]] = [
     (jianshu.JianshuSource, True, 1800),           # 简书
     (huxiu.HuxiuSource, False, 1800),              # 虎嗅网（海外服务器 WAF 拦截，暂禁用）
     (ftchinese.FtchineseSource, False, 3600),    # FT中文网（Google News 重定向在用户浏览器无法加载，暂禁用）
+    (qbitai.QbitaiSource, True, 1800),          # 量子位
+    (huggingface.HuggingfaceSource, True, 3600), # Hugging Face Blog
 ]
 
 
