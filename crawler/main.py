@@ -33,18 +33,60 @@ _scheduler: Optional[AsyncIOScheduler] = None
 
 
 async def scheduled_fetch():
-    """定时抓取所有数据源"""
+    """定时抓取所有数据源，支持失败重试和旧缓存保护"""
     from datetime import datetime
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     logger.info(f'[定时任务] 开始抓取数据 {now}')
+
+    # 保存旧缓存作为兜底
+    old_cache = get_cached_news() or []
+    old_by_source = {}
+    for item in old_cache:
+        old_by_source.setdefault(item.source, []).append(item)
+
     try:
         clear_cache()
         all_items, source_counts = await fetch_all_sources()
+
+        # 检查哪些源返回了 0 条数据，进行一次重试
+        failed_sources = [k for k, v in source_counts.items() if v == 0]
+        if failed_sources:
+            logger.warning(f'[定时任务] 以下数据源抓取失败，将进行重试: {failed_sources}')
+            from sources import get_enabled_sources
+            for source_cls in get_enabled_sources():
+                if source_cls.info.source in failed_sources:
+                    try:
+                        if asyncio.iscoroutinefunction(source_cls.fetch):
+                            items = await source_cls.fetch()
+                        else:
+                            items = await asyncio.to_thread(source_cls.fetch)
+                        if items:
+                            all_items.extend(items)
+                            source_counts[source_cls.info.source] = len(items)
+                            logger.info(f'[定时任务] 重试成功: {source_cls.info.source} ({len(items)} 条)')
+                    except Exception as e:
+                        logger.error(f'[定时任务] 重试失败: {source_cls.info.source} — {e}')
+
+        # 如果某些源重试后仍然为 0，尝试保留旧缓存中的数据
+        still_failed = [k for k, v in source_counts.items() if v == 0]
+        if still_failed and old_by_source:
+            for src in still_failed:
+                if src in old_by_source:
+                    all_items.extend(old_by_source[src])
+                    logger.warning(f'[定时任务] 保留旧缓存: {src} ({len(old_by_source[src])} 条)')
+
         ranked = merge_and_rank(all_items, top_n=1000)
         set_cached_news(ranked)
-        logger.info(f'[定时任务] 完成，共抓取 {len(all_items)} 条，来自 {[k for k,v in source_counts.items() if v > 0]}')
+
+        ok_sources = [k for k, v in source_counts.items() if v > 0]
+        logger.info(f'[定时任务] 完成，共抓取 {len(all_items)} 条，来自 {ok_sources}')
+
     except Exception as e:
         logger.error(f'[定时任务] 抓取失败: {e}')
+        # 恢复旧缓存，确保服务不返回空数据
+        if old_cache:
+            set_cached_news(old_cache)
+            logger.info(f'[定时任务] 已恢复旧缓存 ({len(old_cache)} 条)')
 
 
 def start_scheduler():
