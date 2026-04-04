@@ -22,6 +22,7 @@ from sources import twitter
 from sources import youtube
 from sources import shaoshupai
 from sources import jianshu
+from sources import ithome
 
 # 来源列表 — 按优先级和重要性排序
 # 格式：(SourceClass, 是否启用, 采集间隔秒数)
@@ -36,7 +37,8 @@ SOURCE_REGISTRY: list[tuple[type[BaseSource], bool, int]] = [
     (xinhua.XinhuaSource, True, 1800),             # 新华社
     (banyuetan.BanyuetanSource, True, 1800),       # 半月谈
     (weixin.WeixinSource, True, 1800),             # 微信热文
-    (netease.NeteaseSource, True, 1800),       # 网易新闻
+    (netease.NeteaseSource, True, 1800),           # 网易新闻
+    (ithome.IthomeSource, True, 1800),            # IT之家
     (github_trending.GitHubTrendingSource, True, 3600),  # GitHub Trending
     (hacker_news.HackerNewsSource, True, 1800),    # Hacker News
     (google_trends.GoogleTrendsSource, True, 3600), # Google Trends
