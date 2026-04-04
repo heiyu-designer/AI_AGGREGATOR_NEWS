@@ -49,8 +49,8 @@ SOURCE_REGISTRY: list[tuple[type[BaseSource], bool, int]] = [
     (youtube.YouTubeSource, True, 1800),            # YouTube
     (shaoshupai.ShaoshupaiSource, True, 1800),     # 少数派
     (jianshu.JianshuSource, True, 1800),           # 简书
-    (huxiu.HuxiuSource, True, 1800),              # 虎嗅网
-    (ftchinese.FtchineseSource, True, 3600),      # FT中文网
+    (huxiu.HuxiuSource, False, 1800),              # 虎嗅网（海外服务器 WAF 拦截，暂禁用）
+    (ftchinese.FtchineseSource, False, 3600),    # FT中文网（Google News 重定向在用户浏览器无法加载，暂禁用）
 ]
 
 

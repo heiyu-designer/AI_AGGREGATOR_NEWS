@@ -34,8 +34,6 @@ const PLATFORMS = [
   { source: 'google_trends', label: 'Google Trends', icon: '🌐', bg: 'bg-gradient-to-r from-teal-500 to-teal-600' },
   { source: 'sspai', label: '少数派', icon: '✒️', bg: 'bg-gradient-to-r from-yellow-500 to-orange-500' },
   { source: 'jianshu', label: '简书', icon: '📝', bg: 'bg-gradient-to-r from-gray-500 to-gray-600' },
-  { source: 'ftchinese', label: 'FT中文网', icon: '🌍', bg: 'bg-gradient-to-r from-blue-700 to-blue-800' },
-  { source: 'huxiu', label: '虎嗅网', icon: '🐯', bg: 'bg-gradient-to-r from-orange-600 to-red-600' },
 ];
 
 function loadFavorites(): Set<string> {
