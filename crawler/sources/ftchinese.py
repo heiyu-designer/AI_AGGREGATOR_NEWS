@@ -92,10 +92,13 @@ class FtchineseSource(BaseSource):
             if _is_noise_title(title) or not _is_news_title(title):
                 continue
 
+            # 去掉 oc=5 参数，保留干净的 Google News 链接
+            # oc=5 强制 Google Reader 视图，不利于直接跳转原文
+            clean_link = link.split('?')[0] if link else link
             item = NewsItem(
-                id=f'ftchinese_{hash(link) % 1000000}',
+                id=f'ftchinese_{hash(clean_link) % 1000000}',
                 title=title,
-                url=link,
+                url=clean_link,
                 source='ftchinese',
                 source_name='FT中文网',
                 source_region='CN',
