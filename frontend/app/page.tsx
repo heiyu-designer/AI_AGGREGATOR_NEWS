@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Loader2, AlertCircle, ExternalLink, Bookmark, BookmarkCheck, Search, RefreshCw, TrendingUp, Flame, Clock, Heart, Link2 } from 'lucide-react';
+import { Loader2, AlertCircle, Search, RefreshCw, TrendingUp, Flame, Clock, Heart, Link2, CalendarDays } from 'lucide-react';
 import { fetchNews } from '@/lib/api';
 import { NewsItem, SortMode } from '@/types/news';
+
+const WEEKDAY = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'] as const;
 
 const FAVORITES_KEY = 'ai-news-favorites';
 
@@ -50,6 +52,14 @@ export default function HomePage() {
   const [sort, setSort] = useState<SortMode>('hot');
   const [keyword, setKeyword] = useState('');
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+
+  const today = useMemo(() => {
+    const d = new Date();
+    const month = d.getMonth() + 1;
+    const day = d.getDate();
+    const weekday = WEEKDAY[d.getDay()];
+    return { month, day, weekday, label: `${month}月${day}日 ${weekday}` };
+  }, []);
 
   useEffect(() => { setFavorites(loadFavorites()); }, []);
 
@@ -103,7 +113,7 @@ export default function HomePage() {
               className="flex-1 text-sm bg-transparent outline-none placeholder:text-gray-400 text-gray-700"
             />
             {keyword && (
-              <button 
+              <button
                 onClick={() => setKeyword('')}
                 className="text-gray-400 hover:text-gray-600 text-xs"
               >
@@ -114,13 +124,19 @@ export default function HomePage() {
 
           {/* 右侧操作区 */}
           <div className="flex items-center gap-3 flex-none">
+            {/* 日期标签 */}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 shadow-sm">
+              <CalendarDays size={13} className="text-indigo-500 flex-shrink-0" />
+              <span className="text-xs font-semibold text-indigo-600 whitespace-nowrap">{today.label}</span>
+            </div>
+
             {/* 排序切换 */}
-            <div className="flex bg-gray-100 rounded-xl p-1 border border-gray-200/50">
+            <div className="flex bg-gray-100 rounded-xl p-1 border border-gray-200/50 shadow-sm">
               <button
                 onClick={() => setSort('hot')}
                 className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-1.5 ${
-                  sort === 'hot' 
-                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/30' 
+                  sort === 'hot'
+                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/30'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -130,8 +146,8 @@ export default function HomePage() {
               <button
                 onClick={() => setSort('time')}
                 className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-1.5 ${
-                  sort === 'time' 
-                    ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-500/30' 
+                  sort === 'time'
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-500/30'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -144,7 +160,7 @@ export default function HomePage() {
             <button
               onClick={handleRefresh}
               disabled={isFetching}
-              className="p-2.5 rounded-xl bg-gray-100/80 hover:bg-gray-200/80 transition-all border border-gray-200/50 backdrop-blur-sm disabled:opacity-50 group"
+              className="p-2.5 rounded-xl bg-gray-100/80 hover:bg-gray-200/80 transition-all border border-gray-200/50 backdrop-blur-sm disabled:opacity-50 group shadow-sm"
               title="刷新"
             >
               <RefreshCw size={14} className={`text-gray-600 group-hover:text-gray-800 ${isFetching ? 'animate-spin' : ''}`} />
